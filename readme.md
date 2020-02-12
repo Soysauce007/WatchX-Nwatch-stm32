@@ -8,7 +8,7 @@
 首先感谢zkemble在2015年提供的 [NWatch](https://github.com/zkemble/NWatch) ，真的是太棒了
 
 其次是 [crystaledm](https://github.com/crystaledm/watchX) 
-提供的c语言库
+提供的c语言库，谢谢
 
 
 ### 开发环境： 
@@ -17,7 +17,7 @@ keil5  ALIENTEK 探索者STM32F407开发板  2.4寸tft屏幕
 
 ### 目前已经完成的移植内容为：
 
-RTC时钟、动画显示、断电flash模拟eeprom，及其自带的所以图标
+RTC时钟、动画显示、断电flash模拟eeprom，及其自带的所有图标
 
 ### 待完成：             
 
