@@ -6,7 +6,7 @@
 
 ，真的是太棒了
 
-![NWatch](E:\Github\WatchX-Nwatch-stm32\效果\Nwatch.jpg)
+![NWatch](https://github.com/Soysauce007/WatchX-Nwatch-stm32/tree/master/%E6%95%88%E6%9E%9C\Nwatch.jpg)
 
 
 其次是
