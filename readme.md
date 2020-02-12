@@ -1,12 +1,21 @@
 移植到Stm32的NWatch
 
-首先感谢zkemble在2015年提供的NWatch，真的是太棒了
+首先感谢zkemble在2015年提供的
 
-![NWatch](https://blog.zakkemble.net/wp-content/uploads/2013/09/PICT2254-300x225.jpg)
+[NWatch]: https://github.com/zkemble/NWatch
 
-https://github.com/zkemble/NWatch
-其次是crystaledm提供的c语言库
-https://github.com/crystaledm/watchX
+，真的是太棒了
+
+![NWatch](E:\Github\WatchX-Nwatch-stm32\效果\Nwatch.jpg)
+
+
+其次是
+
+[crystaledm]: https://github.com/crystaledm/watchX
+
+
+提供的c语言库
+
 
 ##### 开发环境： 
 
