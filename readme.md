@@ -2,16 +2,14 @@
 
 首先感谢zkemble在2015年提供的
 
-[NWatch]: https://github.com/zkemble/NWatch
+[NWatch]: https://github.com/zkemble/NWatch	"NWatch"
 
 ，真的是太棒了
-
-![NWatch](https://github.com/Soysauce007/WatchX-Nwatch-stm32/tree/master/%E6%95%88%E6%9E%9C\Nwatch.jpg)
 
 
 其次是
 
-[crystaledm]: https://github.com/crystaledm/watchX
+[crystaledm]: https://github.com/crystaledm/watchX	"crystaledm"
 
 
 提供的c语言库
