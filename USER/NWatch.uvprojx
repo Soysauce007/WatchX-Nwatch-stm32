@@ -713,9 +713,9 @@
           <GroupName>README</GroupName>
           <Files>
             <File>
-              <FileName>readme.txt</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\readme.txt</FilePath>
+              <FileName>readme.md</FileName>
+              <FileType>9</FileType>
+              <FilePath>..\readme.md</FilePath>
             </File>
           </Files>
         </Group>

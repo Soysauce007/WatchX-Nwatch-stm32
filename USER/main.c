@@ -7,7 +7,7 @@
 //开发环境： keil5  ALIENTEK 探索者STM32F407开发板  2.4寸tft屏幕
 //
 //Nwatch已经成功移植到了Stm32啦，目前已经完成的移植内容为：
-//                                                     RTC时钟、动画显示、断电flash模拟eeprom，及其自带的所以图标
+//                                                     RTC时钟、动画显示、断电flash模拟eeprom，及其自带的所有图标
 //                                 待完成：             闹铃的flash存储，Sleep睡眠模式（低功耗模式），电压检测
 //
 //可实现的效果：闹钟、手电筒、秒表计时、3D动画演示、游戏（赛车、破坏小球）
@@ -25,7 +25,7 @@
 //对于想移植到其它stm32单片机上的小伙伴，需要特别注意appconfig.c中间的eepCheck_SAVE_ADDR 这个偏移地址，请适当调整
 // EEPROM_CHECK_NUM这个值很玄学，我尝试了很久才出来
 //
-//移植和改动文件程序的时候需要主要：  common.h
+//移植和改动文件程序的时候需要主要：   common.h
 //对于预编译不满意的可以修改：        config.h
 //
 //横屏显示的骚操作在 lcd.c LCD_Fast_DrawPoint 里面有一个倍数方便查找

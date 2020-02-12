@@ -1058,13 +1058,13 @@
     <File>
       <GroupNumber>7</GroupNumber>
       <FileNumber>55</FileNumber>
-      <FileType>5</FileType>
+      <FileType>9</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\readme.txt</PathWithFileName>
-      <FilenameWithoutPath>readme.txt</FilenameWithoutPath>
+      <PathWithFileName>..\readme.md</PathWithFileName>
+      <FilenameWithoutPath>readme.md</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
