@@ -1,274 +1,31 @@
-/*
- * Project: N|Watch
- * Author: Zak Kemble, contact@zakkemble.co.uk
- * Copyright: (C) 2013 by Zak Kemble
- * License: GNU GPL v3 (see License.txt)
- * Web: http://blog.zakkemble.co.uk/diy-digital-wristwatch/
- */
-
-#include "common.h"
-#include "led.h"
-#include "stmflash.h"
-
-#define NOALARM	UCHAR_MAX
-
-static byte nextAlarm;
-static byte nextAlarmDay;
-static bool alarmSetOff;
-static draw_f oldDrawFunc;
-static button_f oldBtn1Func;
-static button_f oldBtn2Func;
-static button_f oldBtn3Func;
-static byte eepCheck_Alarms EEMEM ;//= EEPROM_CHECK_NUM;
-
-
- alarm_s eepAlarms[ALARM_COUNT]    = {{22,45,0},{01,48,4},{7,45,63},{9,4,0},{3,1,7}};
-
-static bool goingOff(void);
-static void getNextAlarm(void);
-static uint toMinutes(byte, byte, byte);
-static bool stopAlarm(void);
-static display_t draw(void);
-
-void alarm_init()
-{
-		     memset(&eepAlarms, 0x00,  ALARM_COUNT *sizeof(alarm_s));
-
-	
-	
-//	
-//	 STMFLASH_Read(eepCheck_Alarms_SAVE_ADDR,(u32*)(&eepCheck_Alarms),sizeof(byte));
-////   appConfig = (appconfig_s *) malloc(sizeof(appconfig_s));
-//	     memset(&eepAlarms, 0x00,  ALARM_COUNT *sizeof(alarm_s));
-
-//	
-//	
-//	 if(eepCheck_Alarms == EEPROM_CHECK_NUM)
-//	
-//	   	STMFLASH_Read(eepAlarms_SAVE_ADDR,(u32*)(&eepAlarms),ALARM_COUNT*sizeof(alarm_s));
-
-//	else
-//	{
-//    eepCheck_Alarms = EEPROM_CHECK_NUM;
-//		STMFLASH_Write(eepCheck_Alarms_SAVE_ADDR,(u32*)(&eepCheck_Alarms),sizeof(byte));
-
-//		alarm_reset();
-//	}
-	
-	
-	
-	
-	getNextAlarm();
-}
-
-void alarm_reset()
-{
-	// Set bytes individually, uses less flash space
-  //����ռ�
-	  memset(&eepAlarms, 0x00, ALARM_COUNT * sizeof(alarm_s));
-	
-	
-//  eepAlarms[0].days=22;eepAlarms[0].enabled=45;eepAlarms[0].fri=0;
-//  eepAlarms[1].days=01;eepAlarms[1].enabled=48;eepAlarms[1].fri=4;
-//  eepAlarms[2].days=07;eepAlarms[2].enabled=45;eepAlarms[2].fri=63;
-//  eepAlarms[3].days=9;eepAlarms[3].enabled=04;eepAlarms[3].fri=0;
-//  eepAlarms[4].days=03;eepAlarms[4].enabled=01;eepAlarms[4].fri=7;
-
-
-  
-	
-	//alarm_s alarm;
-	//memset(&alarm, 0, sizeof(alarm_s));
-	//LOOPR(ALARM_COUNT, i)
-	//	eeprom_update_block(&alarm, &eepAlarms[i], sizeof(alarm_s));
-}
-
-void alarm_get(byte num, alarm_s* alarm)
-{
-//	alarm=&eepAlarms[num];
-	memcpy(alarm, &eepAlarms[num],sizeof(alarm_s));
-	
-  	STMFLASH_Read(eepAlarms_SAVE_ADDR+num*sizeof(alarm_s),(u32*)(&eepAlarms[num]),sizeof(alarm_s));
-  
-//  	memcpy(alarm, &eepAlarms,sizeof(alarm_s));
-
-	
-//	eeprom_read_block(alarm, &eepAlarms[num], sizeof(alarm_s));
-//	if(alarm->hour > 23)
-//		memset(alarm, 0, sizeof(alarm_s));
-}
-
-bool alarm_getNext(alarm_s* alarm)
-{
-	if(nextAlarm == NOALARM)
-		return false;
-	alarm_get(nextAlarm, alarm);
-	return true;
-}
-
-byte alarm_getNextDay()
-{
-	return nextAlarmDay;
-}
-
-void alarm_save(byte num, alarm_s* alarm)
-{
-//	eeprom_update_block(alarm, &eepAlarms[num], sizeof(alarm_s));
-	
-
-	
-	  	STMFLASH_Write(eepAlarms_SAVE_ADDR+num*sizeof(alarm_s),(u32*)(&eepAlarms[num]),sizeof(alarm_s));
-
-	//	memcpy(&eepAlarms[num],alarm,sizeof(alarm_s));
-
-	//eepAlarms[num]=*alarm;
-	getNextAlarm();
-}
-
-void alarm_update()
-{
-	bool wasGoingOff = alarmSetOff;
-	bool alarmNow = goingOff();
-	if(alarmSetOff)
-	{
-		if(alarmNow)
-		{
-			if(wasGoingOff != alarmSetOff)
-			{
-				oldDrawFunc = display_setDrawFunc(draw);
-				oldBtn1Func = buttons_setFunc(BTN_1, NULL);
-				oldBtn2Func = buttons_setFunc(BTN_2, stopAlarm);
-				oldBtn3Func = buttons_setFunc(BTN_3, NULL);
-//				pwrmgr_setState(PWR_ACTIVE_ALARM, PWR_STATE_IDLE);
-				tune_play(tuneAlarm, VOL_ALARM, PRIO_ALARM);
-			}
-          LED0=!LED0;
-			if(!led_flashing())
-			{
-				static led_t ledFlash = LED_GREEN;
-				ledFlash = (ledFlash == LED_GREEN) ? LED_RED : LED_GREEN;
-				led_flash(ledFlash, 150, 255);
-			}
-		}
-		else if(!alarmNow)
-			stopAlarm();
-	}
-}
-
-void alarm_updateNextAlarm()
-{
-	getNextAlarm();
-}
-
-static bool goingOff()
-{
-	alarm_s nextAlarm;
-	
-	// Make sure we're in 24 hour mode
-	time_s time;
-	time.hour = timeDate.time.hour;
-	time.ampm = timeDate.time.ampm;
-	time_timeMode(&time, TIMEMODE_24HR);
-
-	if(alarm_getNext(&nextAlarm) && alarm_dayEnabled(nextAlarm.days, timeDate.date.day) && nextAlarm.hour == time.hour && nextAlarm.min == timeDate.time.mins)
-	{
-		if(timeDate.time.secs == 0)
-			alarmSetOff = true;
-		return true;
-	}
-	return false;
-}
-
-// This func needs to be ran when an alarm has changed, time has changed or an active alarm has been turned off
-static void getNextAlarm()
-{
-	byte next = NOALARM;
-	uint nextTime = (uint)UINT_MAX;
-
-	// Make sure time is in 24 hour mode
-	time_s timeNow;
-	timeNow.hour = timeDate.time.hour;
-	timeNow.ampm = timeDate.time.ampm;
-	time_timeMode(&timeNow, TIMEMODE_24HR);
-
-	// Now in minutes from start of week
-	uint now = toMinutes(timeNow.hour, timeDate.time.mins + 1, timeDate.date.day);
-
-	// Loop through alarms
-	LOOPR(ALARM_COUNT, i)
-	{
-		// Get alarm data
-		alarm_s alarm;
-		alarm_get(i, &alarm);
-
-		// Not enabled
-		if(!alarm.enabled)
-			continue;
-
-		// Loop through days
-		LOOPR(7, d)
-		{
-			// Day not enabled
-			if(!alarm_dayEnabled(alarm.days, d))
-				continue;
-
-			// Alarm time in minutes from start of week
-			uint alarmTime = toMinutes(alarm.hour, alarm.min, d);
-
-			// Minutes to alarm
-			int timeTo = alarmTime - now;
-
-			// Negative result, must mean alarm time is earlier in the week than now, add a weeks time
-			if(timeTo < 0)
-				timeTo += ((6*1440) + (23*60) + 59); // 10079
-
-			// Is minutes to alarm less than the last minutes to alarm?
-			if((uint)timeTo < nextTime)
-			{
-				// This is our next alarm
-				nextTime = timeTo;
-				next = i;
-				nextAlarmDay = d;
-			}
-		}
-	}
-
-	// Set next alarm
-	nextAlarm = next;
-}
-
-static uint toMinutes(byte hours, byte mins, byte dow)
-{
-	uint total = mins;
-	total += hours * 60;
-	total += dow * 1440;
-	return total;
-}
-
-static bool stopAlarm()
-{
-	getNextAlarm();
-	display_setDrawFunc(oldDrawFunc);
-	buttons_setFuncs(oldBtn1Func, oldBtn2Func, oldBtn3Func);
-//	oled_setInvert(appConfig.invert);
-//	pwrmgr_setState(PWR_ACTIVE_ALARM, PWR_STATE_NONE);
-	tune_stop(PRIO_ALARM);
-	alarmSetOff = false;
-	return true;
-}
-
-static display_t draw()
-{
-	if((millis8_t)millis() < 128)
-		draw_bitmap(16, 16, menu_alarm, 32, 32, NOINVERT, 0);
-	
-	// Draw time
-	draw_string(time_timeStr(), NOINVERT, 79, 20);
-
-	// Draw day
-	char buff[BUFFSIZE_STR_DAYS];
-	strcpy(buff, days[timeDate.date.day]);
-	draw_string(buff, false, 86, 36);
-
-	return DISPLAY_DONE;
-}
+//开发环境： keil5  ALIENTEK 探索者STM32F407开发板  2.4寸tft屏幕
+//
+//Nwatch已经成功移植到了Stm32啦，目前已经完成的移植内容为：
+//                                                     RTC时钟、动画显示、断电flash模拟eeprom，及其自带的所以图标
+//                                 待完成：             闹铃的flash存储，Sleep睡眠模式（低功耗模式），电压检测
+//
+//可实现的效果：闹钟、手电筒、秒表计时、3D动画演示、游戏（赛车、破坏小球）
+//             设置->日期调整、（睡眠时间设置）、显示设置、版本信息查看、FPS显示
+//感兴趣的小伙伴可以进群			
+//                                                  
+//主要的菜单界面可以阅读借鉴：setting.c 的迭代器函数  static void itemLoader(byte num)   同时注意 #define OPTION_COUNT	5中间的OPTION_COUNT 根据时间情况进行增加减少
+//                          void setMenuOption_P(byte num, const char* name, const byte* icon, menu_f actionFunc)  中的actionFunc  根据输入的Go to Definition  of "xxxxx" 就可以进入对应的文件进行修改，也可以模仿进行添加文件
+//                        
+//还有一种菜单模式，可以借鉴 timedate.c 和 diag.c
+//
+//对于想将屏幕移植到oled 的小伙伴，只需要将void oled_flush(void)重写，oledBuffer[] 输出到oled屏幕上
+//将因为手上还没有oled 我只是模拟了oled 的显示方式，无需修改其他位置
+//
+//对于想移植到其它stm32单片机上的小伙伴，需要特别注意appconfig.c中间的eepCheck_SAVE_ADDR 这个偏移地址，请适当调整
+// EEPROM_CHECK_NUM这个值很玄学，我尝试了很久才出来
+//
+//移植和改动文件程序的时候需要主要：  common.h
+//对于预编译不满意的可以修改：        config.h
+//
+//横屏显示的骚操作在 lcd.c LCD_Fast_DrawPoint 里面有一个倍数方便查找
+//
+//对了这个lcd.c是我简化过正点原子的库的，对你自己的屏幕需要你找个可以用的屏幕库修改一哈
+//
+//希望大家疫情期间玩的开心，保重身体！！！
+//
+//      
