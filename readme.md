@@ -92,4 +92,6 @@ typedef void (*itemLoader_f)(byte);
 
 ## 希望大家疫情期间玩的开心，保重身体！！！
 
-​      
+ 移植了部分在stm32f103上，请移步至：
+
+https://github.com/Soysauce007/Nwatch-Stm32f103    
